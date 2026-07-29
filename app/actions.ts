@@ -1,0 +1,15 @@
+"use server";
+import { hash } from "bcryptjs";
+import { AuthError } from "next-auth";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { auth, signIn } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { competitorSchema, credentialsSchema, productSchema } from "@/lib/validators";
+import { z } from "zod";
+export type ActionState = { error?: string; success?: string };
+export async function login(_: ActionState, data: FormData): Promise<ActionState> { try { await signIn("credentials", { email: data.get("email"), password: data.get("password"), redirectTo: "/dashboard" }); } catch (error) { if (error instanceof AuthError) return { error: "E-mail ou senha inválidos." }; throw error; } return {}; }
+export async function register(_: ActionState, data: FormData): Promise<ActionState> { const input = credentialsSchema.extend({ name: z.string().trim().min(2).max(100) }).safeParse({ name: data.get("name"), email: data.get("email"), password: data.get("password") }); const name = String(data.get("name") ?? "").trim(); if (!input.success) return { error: "Revise os dados. A senha deve ter pelo menos 8 caracteres." }; const email = input.data.email.toLowerCase(); if (await prisma.user.findUnique({ where: { email } })) return { error: "Este e-mail já está cadastrado." }; await prisma.user.create({ data: { name, email, passwordHash: await hash(input.data.password, 12) } }); await signIn("credentials", { email, password: input.data.password, redirectTo: "/dashboard" }); return {}; }
+async function userId() { const session = await auth(); if (!session?.user?.id) redirect("/login"); return session.user.id; }
+export async function addCompetitor(_: ActionState, data: FormData): Promise<ActionState> { const uid = await userId(); const parsed = competitorSchema.safeParse(Object.fromEntries(data)); if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." }; if (await prisma.competitor.count({ where: { userId: uid } }) >= 20) return { error: "Limite de 20 concorrentes atingido." }; try { await prisma.competitor.create({ data: { userId: uid, ...parsed.data } }); } catch { return { error: "Este concorrente já está cadastrado." }; } revalidatePath("/competitors"); return { success: "Concorrente adicionado." }; }
+export async function addProduct(_: ActionState, data: FormData): Promise<ActionState> { const uid = await userId(); const parsed = productSchema.safeParse(Object.fromEntries(data)); if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." }; const competitor = await prisma.competitor.findFirst({ where: { id: parsed.data.competitorId, userId: uid } }); if (!competitor) return { error: "Concorrente inválido." }; if (await prisma.product.count({ where: { competitor: { userId: uid } } }) >= 500) return { error: "Limite de 500 produtos atingido." }; await prisma.product.create({ data: { ...parsed.data, currentPrice: parsed.data.currentPrice } }); revalidatePath("/products"); return { success: "Produto adicionado." }; }
