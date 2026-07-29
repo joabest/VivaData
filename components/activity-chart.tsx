@@ -1,0 +1,4 @@
+"use client";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+const data = [{d:"Seg",a:22},{d:"Ter",a:30},{d:"Qua",a:27},{d:"Qui",a:48},{d:"Sex",a:55},{d:"Sáb",a:44},{d:"Dom",a:68}];
+export function ActivityChart() { return <div className="h-64"><ResponsiveContainer width="100%" height="100%"><AreaChart data={data}><defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#6d5dfc" stopOpacity={.35}/><stop offset="1" stopColor="#6d5dfc" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" vertical={false} opacity={.2}/><XAxis dataKey="d" axisLine={false} tickLine={false}/><YAxis axisLine={false} tickLine={false}/><Tooltip/><Area type="monotone" dataKey="a" stroke="#6d5dfc" strokeWidth={3} fill="url(#fill)"/></AreaChart></ResponsiveContainer></div>; }

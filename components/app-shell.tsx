@@ -1,0 +1,4 @@
+import { Search } from "lucide-react";
+import { Sidebar } from "./sidebar";
+import { ThemeToggle } from "./theme-toggle";
+export function AppShell({ children }: { children: React.ReactNode }) { return <div className="flex min-h-screen"><Sidebar/><main className="min-w-0 flex-1"><header className="flex h-20 items-center justify-between border-b border-slate-200 bg-white/80 px-5 backdrop-blur dark:border-slate-800 dark:bg-slate-950/80 md:px-8"><div className="relative hidden max-w-md flex-1 md:block"><Search className="absolute left-3 top-2.5 text-slate-400" size={18}/><input className="input pl-10" placeholder="Buscar concorrentes, produtos ou criadores..."/></div><div className="ml-auto flex items-center gap-3"><ThemeToggle/><div className="grid h-10 w-10 place-items-center rounded-full bg-brand/15 text-sm font-bold text-brand">VD</div></div></header><div className="p-5 md:p-8">{children}</div></main></div>; }
