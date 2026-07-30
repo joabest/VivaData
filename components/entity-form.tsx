@@ -1,0 +1,5 @@
+"use client";
+import { useActionState, useState } from "react";
+import { Plus, X } from "lucide-react";
+import { ActionState } from "@/app/actions";
+export function EntityForm({ title, action, children }: { title: string; action: (_: ActionState, data: FormData) => Promise<ActionState>; children: React.ReactNode }) { const [open,setOpen]=useState(false); const [state,formAction,pending]=useActionState(action,{}); return <><button className="button gap-2" onClick={()=>setOpen(true)}><Plus size={17}/>{title}</button>{open&&<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4"><div className="card w-full max-w-lg"><div className="mb-5 flex justify-between"><h2 className="text-xl font-bold">{title}</h2><button onClick={()=>setOpen(false)} aria-label="Fechar"><X/></button></div><form action={formAction} className="space-y-4">{children}{state.error&&<p className="text-sm text-red-600">{state.error}</p>}{state.success&&<p className="text-sm text-emerald-600">{state.success}</p>}<button disabled={pending} className="button w-full">{pending?"Salvando...":"Salvar"}</button></form></div></div>}</>; }

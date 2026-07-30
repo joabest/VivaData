@@ -1,0 +1,2 @@
+import { Bell } from "lucide-react";
+export default function Alerts(){return <><h1 className="text-3xl font-bold">Alertas</h1><p className="muted mt-1">Mudanças importantes identificadas no monitoramento.</p><div className="card mt-7 grid place-items-center py-16 text-center"><Bell size={40} className="mb-3 text-slate-300"/><h2 className="font-bold">Tudo acompanhado</h2><p className="muted">Novos alertas aparecerão aqui após as coletas.</p></div></>}
