@@ -33,3 +33,5 @@ MIT.
 ## Deploy
 
 A instalação executa `prisma generate` via `postinstall`. A aplicação não executa migrations durante o build da Vercel; aplique-as em uma etapa controlada com `npm run db:migrate:deploy`. A CI valida schema, lint, tipos, testes e build. O worker externo permanece no roadmap e não deve compartilhar o processo da aplicação web.
+
+Na Vercel, configure `NEXT_PUBLIC_APP_URL` e `NEXTAUTH_URL` com o domínio HTTPS do projeto. Remova valores antigos apontando para `localhost`: quando `NEXTAUTH_URL` ou `AUTH_URL` está definido, o Auth.js pode usá-lo como origem canônica. Preview deployments podem omitir `NEXTAUTH_URL` e usar os headers confiáveis da Vercel; URLs absolutas da aplicação usam, em ordem, `NEXT_PUBLIC_APP_URL`, `VERCEL_PROJECT_PRODUCTION_URL` e `VERCEL_URL`.
