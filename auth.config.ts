@@ -5,6 +5,7 @@ export const authConfig = {
   pages: { signIn: "/login" },
   session: { strategy: "jwt", maxAge: 60 * 60 * 24 * 7 },
   trustHost: true,
+  providers: [],
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const privatePath = [
