@@ -1,131 +1,298 @@
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+generator client {
+  provider = "prisma-client-js"
+}
 
-enum Role { USER ADMIN }
-enum MonitorStatus { ACTIVE PAUSED ERROR }
-enum Availability { AVAILABLE UNAVAILABLE REMOVED }
-enum Confidence { LOW MEDIUM HIGH }
-enum AlertSeverity { INFO WARNING CRITICAL }
-enum JobStatus { PENDING RUNNING COMPLETED FAILED }
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum MonitorStatus {
+  ACTIVE
+  PAUSED
+  ERROR
+}
+
+enum Availability {
+  AVAILABLE
+  UNAVAILABLE
+  REMOVED
+}
+
+enum Confidence {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
 
 model User {
-  id String @id @default(cuid())
-  name String
-  email String @unique
-  passwordHash String
-  role Role @default(USER)
-  competitors Competitor[]
-  alerts Alert[]
+  id             String          @id @default(cuid())
+  name           String
+  email          String          @unique
+  passwordHash   String
+  role           Role            @default(USER)
+  competitors    Competitor[]
+  alerts         Alert[]
   collectionJobs CollectionJob[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
+
 model Competitor {
-  id String @id @default(cuid())
-  userId String
-  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
-  name String
-  username String?
-  shopUrl String
-  profileUrl String?
-  externalId String?
-  category String?
-  status MonitorStatus @default(ACTIVE)
-  lastCollectedAt DateTime?
-  shops Shop[]
-  products Product[]
-  videos Video[]
-  creators CreatorCompetitor[]
-  lives Live[]
-  alerts Alert[]
-  collectionJobs CollectionJob[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String              @id @default(cuid())
+  userId            String
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name              String
+  username          String?
+  shopUrl           String
+  profileUrl        String?
+  externalId        String?
+  category          String?
+  status            MonitorStatus       @default(ACTIVE)
+  lastCollectedAt   DateTime?
+  shops             Shop[]
+  products          Product[]
+  videos            Video[]
+  creators          CreatorCompetitor[]
+  lives             Live[]
+  alerts            Alert[]
+  collectionJobs    CollectionJob[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
   @@unique([userId, shopUrl])
   @@index([userId, status])
 }
+
 model Shop {
-  id String @id @default(cuid())
+  id           String     @id @default(cuid())
   competitorId String
-  competitor Competitor @relation(fields:[competitorId], references:[id], onDelete:Cascade)
-  externalId String?
-  name String
-  url String
-  rating Decimal? @db.Decimal(3,2)
-  reviewCount Int @default(0)
-  productCount Int @default(0)
-  products Product[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  competitor   Competitor @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+  externalId   String?
+  name         String
+  url          String
+  rating       Decimal?   @db.Decimal(3, 2)
+  reviewCount  Int        @default(0)
+  productCount Int        @default(0)
+  products     Product[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
   @@index([competitorId])
 }
+
 model Product {
-  id String @id @default(cuid())
-  competitorId String
-  competitor Competitor @relation(fields:[competitorId], references:[id], onDelete:Cascade)
-  shopId String?
-  shop Shop? @relation(fields:[shopId], references:[id], onDelete:SetNull)
-  externalId String?
-  name String
-  description String?
-  url String
-  imageUrl String?
-  category String?
-  currency String @default("BRL")
-  currentPrice Decimal @db.Decimal(12,2)
-  originalPrice Decimal? @db.Decimal(12,2)
-  rating Decimal? @db.Decimal(3,2)
-  reviewCount Int @default(0)
-  availability Availability @default(AVAILABLE)
-  snapshots ProductSnapshot[]
-  priceHistory PriceHistory[]
-  videos ProductVideo[]
-  liveProducts LiveProduct[]
-  alerts Alert[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String           @id @default(cuid())
+  competitorId   String
+  competitor     Competitor       @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+  shopId         String?
+  shop           Shop?            @relation(fields: [shopId], references: [id], onDelete: SetNull)
+  externalId     String?
+  name           String
+  description    String?
+  url            String
+  imageUrl       String?
+  category       String?
+  currency       String           @default("BRL")
+  currentPrice   Decimal          @db.Decimal(12, 2)
+  originalPrice  Decimal?         @db.Decimal(12, 2)
+  rating         Decimal?         @db.Decimal(3, 2)
+  reviewCount    Int              @default(0)
+  availability   Availability     @default(AVAILABLE)
+  snapshots      ProductSnapshot[]
+  priceHistory   PriceHistory[]
+  videos         ProductVideo[]
+  liveProducts   LiveProduct[]
+  alerts         Alert[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
   @@index([competitorId, updatedAt])
 }
+
 model ProductSnapshot {
-  id String @id @default(cuid())
-  productId String
-  product Product @relation(fields:[productId], references:[id], onDelete:Cascade)
-  price Decimal @db.Decimal(12,2)
-  originalPrice Decimal? @db.Decimal(12,2)
-  rating Decimal? @db.Decimal(3,2)
-  reviewCount Int
-  availability Availability
+  id                String       @id @default(cuid())
+  productId         String
+  product           Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  price             Decimal      @db.Decimal(12, 2)
+  originalPrice     Decimal?     @db.Decimal(12, 2)
+  rating            Decimal?     @db.Decimal(3, 2)
+  reviewCount       Int
+  availability      Availability
   estimatedSalesMin Int?
   estimatedSalesMax Int?
-  estimatedGmvMin Decimal? @db.Decimal(14,2)
-  estimatedGmvMax Decimal? @db.Decimal(14,2)
-  confidence Confidence?
-  capturedAt DateTime @default(now())
+  estimatedGmvMin   Decimal?     @db.Decimal(14, 2)
+  estimatedGmvMax   Decimal?     @db.Decimal(14, 2)
+  confidence        Confidence?
+  capturedAt        DateTime     @default(now())
+
   @@index([productId, capturedAt])
 }
-model PriceHistory { id String @id @default(cuid()) productId String product Product @relation(fields:[productId], references:[id], onDelete:Cascade) price Decimal @db.Decimal(12,2) capturedAt DateTime @default(now()) @@index([productId, capturedAt]) }
-model Creator {
-  id String @id @default(cuid())
-  externalId String? @unique
-  username String @unique
-  displayName String
-  profileUrl String
-  avatarUrl String?
-  followers Int @default(0)
-  following Int @default(0)
-  totalLikes BigInt @default(0)
-  snapshots CreatorSnapshot[]
-  videos Video[]
-  competitors CreatorCompetitor[]
-  lives Live[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+model PriceHistory {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  price      Decimal  @db.Decimal(12, 2)
+  capturedAt DateTime @default(now())
+
+  @@index([productId, capturedAt])
 }
-model CreatorSnapshot { id String @id @default(cuid()) creatorId String creator Creator @relation(fields:[creatorId], references:[id], onDelete:Cascade) followers Int averageViews Int averageLikes Int engagementRate Decimal @db.Decimal(7,4) capturedAt DateTime @default(now()) @@index([creatorId, capturedAt]) }
-model Video { id String @id @default(cuid()) creatorId String creator Creator @relation(fields:[creatorId], references:[id], onDelete:Cascade) competitorId String competitor Competitor @relation(fields:[competitorId], references:[id], onDelete:Cascade) externalId String @unique url String description String? thumbnailUrl String? views BigInt @default(0) likes BigInt @default(0) comments Int @default(0) shares Int @default(0) products ProductVideo[] publishedAt DateTime discoveredAt DateTime @default(now()) updatedAt DateTime @updatedAt @@index([competitorId, publishedAt]) }
-model ProductVideo { productId String product Product @relation(fields:[productId], references:[id], onDelete:Cascade) videoId String video Video @relation(fields:[videoId], references:[id], onDelete:Cascade) @@id([productId, videoId]) }
-model CreatorCompetitor { creatorId String creator Creator @relation(fields:[creatorId], references:[id], onDelete:Cascade) competitorId String competitor Competitor @relation(fields:[competitorId], references:[id], onDelete:Cascade) firstSeenAt DateTime @default(now()) @@id([creatorId, competitorId]) }
-model Live { id String @id @default(cuid()) competitorId String competitor Competitor @relation(fields:[competitorId], references:[id], onDelete:Cascade) creatorId String? creator Creator? @relation(fields:[creatorId], references:[id], onDelete:SetNull) externalId String @unique title String? startedAt DateTime endedAt DateTime? duration Int? peakViewers Int? totalLikes BigInt @default(0) totalComments Int @default(0) products LiveProduct[] createdAt DateTime @default(now()) }
-model LiveProduct { liveId String live Live @relation(fields:[liveId], references:[id], onDelete:Cascade) productId String product Product @relation(fields:[productId], references:[id], onDelete:Cascade) firstSeenAt DateTime lastSeenAt DateTime? displayOrder Int? exposureSeconds Int? @@id([liveId, productId]) }
-model Alert { id String @id @default(cuid()) userId String user User @relation(fields:[userId], references:[id], onDelete:Cascade) competitorId String? competitor Competitor? @relation(fields:[competitorId], references:[id], onDelete:Cascade) productId String? product Product? @relation(fields:[productId], references:[id], onDelete:Cascade) type String title String message String severity AlertSeverity @default(INFO) metadata Json? readAt DateTime? createdAt DateTime @default(now()) @@index([userId, readAt, createdAt]) }
-model CollectionJob { id String @id @default(cuid()) userId String user User @relation(fields:[userId], references:[id], onDelete:Cascade) competitorId String? competitor Competitor? @relation(fields:[competitorId], references:[id], onDelete:SetNull) type String status JobStatus @default(PENDING) attempts Int @default(0) startedAt DateTime? finishedAt DateTime? errorMessage String? metadata Json? createdAt DateTime @default(now()) @@index([userId, status]) }
+
+model Creator {
+  id          String              @id @default(cuid())
+  externalId  String?             @unique
+  username    String              @unique
+  displayName String
+  profileUrl  String
+  avatarUrl   String?
+  followers   Int                 @default(0)
+  following   Int                 @default(0)
+  totalLikes  BigInt              @default(0)
+  snapshots   CreatorSnapshot[]
+  videos      Video[]
+  competitors CreatorCompetitor[]
+  lives       Live[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model CreatorSnapshot {
+  id             String   @id @default(cuid())
+  creatorId      String
+  creator        Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  followers      Int
+  averageViews   Int
+  averageLikes   Int
+  engagementRate Decimal  @db.Decimal(7, 4)
+  capturedAt     DateTime @default(now())
+
+  @@index([creatorId, capturedAt])
+}
+
+model Video {
+  id           String         @id @default(cuid())
+  creatorId    String
+  creator      Creator        @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  competitorId String
+  competitor   Competitor     @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+  externalId   String         @unique
+  url          String
+  description  String?
+  thumbnailUrl String?
+  views        BigInt         @default(0)
+  likes        BigInt         @default(0)
+  comments     Int            @default(0)
+  shares       Int            @default(0)
+  products     ProductVideo[]
+  publishedAt  DateTime
+  discoveredAt DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([competitorId, publishedAt])
+}
+
+model ProductVideo {
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  videoId   String
+  video     Video   @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@id([productId, videoId])
+}
+
+model CreatorCompetitor {
+  creatorId   String
+  creator     Creator    @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  competitorId String
+  competitor  Competitor @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+  firstSeenAt DateTime   @default(now())
+
+  @@id([creatorId, competitorId])
+}
+
+model Live {
+  id            String        @id @default(cuid())
+  competitorId  String
+  competitor    Competitor    @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+  creatorId     String?
+  creator       Creator?      @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+  externalId    String        @unique
+  title         String?
+  startedAt     DateTime
+  endedAt       DateTime?
+  duration      Int?
+  peakViewers   Int?
+  totalLikes    BigInt        @default(0)
+  totalComments Int           @default(0)
+  products      LiveProduct[]
+  createdAt     DateTime      @default(now())
+}
+
+model LiveProduct {
+  liveId          String
+  live            Live      @relation(fields: [liveId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  firstSeenAt     DateTime
+  lastSeenAt      DateTime?
+  displayOrder    Int?
+  exposureSeconds Int?
+
+  @@id([liveId, productId])
+}
+
+model Alert {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  competitorId String?
+  competitor   Competitor?   @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+  productId    String?
+  product      Product?      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type         String
+  title        String
+  message      String
+  severity     AlertSeverity @default(INFO)
+  metadata     Json?
+  readAt       DateTime?
+  createdAt    DateTime      @default(now())
+
+  @@index([userId, readAt, createdAt])
+}
+
+model CollectionJob {
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  competitorId String?
+  competitor   Competitor?  @relation(fields: [competitorId], references: [id], onDelete: SetNull)
+  type         String
+  status       JobStatus    @default(PENDING)
+  attempts     Int          @default(0)
+  startedAt    DateTime?
+  finishedAt   DateTime?
+  errorMessage String?
+  metadata     Json?
+  createdAt    DateTime     @default(now())
+
+  @@index([userId, status])
+}
