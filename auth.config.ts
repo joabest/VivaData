@@ -16,7 +16,14 @@ export const authConfig = {
         "/videos",
         "/lives",
         "/alerts",
-      ].some((path) => nextUrl.pathname.startsWith(path));
+        "/categories",
+        "/trends",
+        "/reports",
+        "/comparisons",
+        "/integrations",
+        "/subscription",
+        "/settings",
+      ].some((path) => nextUrl.pathname === path || nextUrl.pathname.startsWith(`${path}/`));
 
       if (!privatePath) return true;
       return Boolean(auth?.user);
